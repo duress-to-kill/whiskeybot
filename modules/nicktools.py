@@ -22,7 +22,7 @@ class NickToolsModule(Module):
             client.nick(nick)
         if self.controller.config.has_option(str(host), "nick_password"):
             nick_password = self.controller.config.get(str(host), "nick_password")
-            client.msg("NickServ", "REGISTER {}".format(nick_password))
+            client.msg("NickServ", "IDENTIFY {}".format(nick_password))
 
         _log.info("Automatic nick configuration complete.")
 
