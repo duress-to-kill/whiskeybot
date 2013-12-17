@@ -14,8 +14,6 @@ parser = argparse.ArgumentParser(description="Example IRC client.")
 
 parser.add_argument("host", nargs="?",
     help="Address of an IRC server, if not specified in the config.")
-parser.add_argument("nick", nargs="?",
-    help="Nickname to use when connecting, if not specified in the config.")
 parser.add_argument("-c", "--config", default="bot.cfg",
     help="Path from which to load configuration data.")
 parser.add_argument("-p", "--port", type=int, default=None,
@@ -58,6 +56,7 @@ def main():
     config_path = os.path.abspath(os.path.expanduser(args.config))
 
     client = kitnirc.client.Client()
+
     controller = kitnirc.modular.Controller(client, config_path)
 
     # Make sure the configuration file is loaded so we can check for
@@ -81,7 +80,8 @@ def main():
             "IRC host must be specified if not in config file.")
 
     # If nick isn't specified on the command line, try from config file
-    nick = args.nick or config_or_none("server", "nick")
+    print(host)
+    nick = config_or_none(str(host), "nick")
     if not nick:
         argparse.ArgumentParser.error(
             "Nick must be specified if not in config file.")
