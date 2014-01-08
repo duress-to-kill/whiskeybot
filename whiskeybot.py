@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser(description="Example IRC client.")
 
 parser.add_argument("host", nargs="?",
     help="Address of an IRC server, if not specified in the config.")
-parser.add_argument("-c", "--config", default="bot.cfg",
+parser.add_argument("-c", "--config", default="config.cfg",
     help="Path from which to load configuration data.")
 parser.add_argument("-p", "--port", type=int, default=None,
     help="Port to use when connecting")
@@ -81,7 +81,7 @@ def main():
 
     # If nick isn't specified on the command line, try from config file
     print(host)
-    nick = config_or_none(str(host), "nick")
+    nick = config_or_none("server", "nick")
     if not nick:
         argparse.ArgumentParser.error(
             "Nick must be specified if not in config file.")
