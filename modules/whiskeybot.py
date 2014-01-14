@@ -4,10 +4,10 @@
 
 import logging
 import argparse
-from StringIO import StringIO
 from kitnirc.modular import Module
 from PyOLP import PyOLP
 from PyOLP.api_objects import NotSet
+from botparse import BotParse
 
 _log = logging.getLogger(__name__)
 
@@ -15,61 +15,22 @@ LIMIT = 5
 
 OLP = PyOLP()
 
-parser_output = StringIO()
-
-class ArgumentParser(argparse.ArgumentParser):
-    def _print_message(self, message, file=None):
-        super(ArgumentParser, self)._print_message(message, parser_output)
-    def exit(self, status=0, message=None):
-        if message:
-            self._print_message(message, None)
-
-parser = ArgumentParser(add_help=False)
-subparsers = parser.add_subparsers(dest='subparser')
-subparser_product = subparsers.add_parser('!product', add_help=False)
-subparser_product.add_argument(
-    '--help', '-h', default=False, action='store_const', const=True,
-    help="print help message"
-)
-subparser_product.add_argument('id', type=str)
-subparser_products = subparsers.add_parser('!products', add_help=False)
-subparser_products.add_argument(
-    '--help', '-h', default=False, action='store_const', const=True,
-    help="print help message"
-)
-subparser_products.add_argument('--code', type=str, default=NotSet)
-subparser_products.add_argument('--proof', type=float, default=NotSet)
-subparser_products.add_argument('--on_sale', type=bool, default=NotSet)
-subparser_products.add_argument('--status', type=str, default=NotSet)
-subparser_products.add_argument('--title', type=str, default=NotSet)
-subparser_store = subparsers.add_parser('!store', add_help=False)
-subparser_store.add_argument(
-    '--help', '-h', default=False, action='store_const', const=True,
-    help="print help message"
-)
-subparser_store.add_argument('id', type=str)
-subparser_stores = subparsers.add_parser('!stores', add_help=False)
-subparser_stores.add_argument(
-    '--help', '-h', default=False, action='store_const', const=True,
-    help="print help message"
-)
-subparser_price = subparsers.add_parser('!price', add_help=False)
-subparser_price.add_argument(
-    '--help', '-h', default=False, action='store_const', const=True,
-    help="print help message"
-)
-subparser_price.add_argument('id', type=str)
-subparser_prices = subparsers.add_parser('!prices', add_help=False)
-subparser_prices.add_argument(
-    '--help', '-h', default=False, action='store_const', const=True,
-    help="print help message"
-)
-subparser_prices.add_argument('product_id', type=str)
-subparser_help = subparsers.add_parser('!help', add_help=False)
-
-def reset_parser_output():
-    parser_output.seek(0, 0)
-    parser_output.truncate()
+parser = BotParse()
+command_product = parser.add_command('!product')
+command_product.add_argument('id', type=str)
+command_products = parser.add_command('!products')
+command_products.add_argument('--code', type=str, default=NotSet)
+command_products.add_argument('--proof', type=float, default=NotSet)
+command_products.add_argument('--on_sale', type=bool, default=NotSet)
+command_products.add_argument('--status', type=str, default=NotSet)
+command_products.add_argument('--title', type=str, default=NotSet)
+command_store = parser.add_command('!store')
+command_store.add_argument('id', type=str)
+command_stores = parser.add_command('!stores')
+command_price = parser.add_command('!price')
+command_price.add_argument('id', type=str)
+command_prices = parser.add_command('!prices')
+command_prices.add_argument('product_id', type=str)
 
 class WhiskeyBotModule(Module):
     
@@ -79,28 +40,22 @@ class WhiskeyBotModule(Module):
         try:
             args = parser.parse_args(message.split())
         except (NameError, TypeError):
-            reset_parser_output()
-            return
-
-        if parser_output.getvalue():
-            parser_output.seek(0, 0)
-            parser_output.truncate()
             return
             
         # Log a message to the INFO log level - see here for more details:
         # http://docs.python.org/2/library/logging.html
         _log.info("Responding to %r in %r", actor, recipient)
         
-        if args.subparser == "!help":
+        if args.command == "!help":
             messages = parser.format_help().split('\n')
 
-        elif args.subparser == "!product":
+        elif args.command == "!product":
             if args.help:
-                messages = subparser_product.format_help().split('\n')
+                messages = command_product.format_help().split('\n')
 
-        elif args.subparser == "!products":
+        elif args.command == "!products":
             if args.help:
-                messages = subparser_products.format_help().split('\n')
+                messages = command_products.format_help().split('\n')
             else:
                 products = OLP.get_products(
                     proof=args.proof,
@@ -123,28 +78,27 @@ class WhiskeyBotModule(Module):
                         price.amount,
                     ))
 
-        elif args.subparser == "!price":
+        elif args.command == "!price":
             if args.help:
-                messages = subparser_price.format_help().split('\n')
+                messages = command_price.format_help().split('\n')
 
-        elif args.subparser == "!prices":
+        elif args.command == "!prices":
             if args.help:
-                messages = subparser_prices.format_help().split('\n')
+                messages = command_prices.format_help().split('\n')
 
-        elif args.subparser == "!store":
+        elif args.command == "!store":
             if args.help:
-                messages = subparser_price.format_help().split('\n')
+                messages = command_price.format_help().split('\n')
 
-        elif args.subparser == "!stores":
+        elif args.command == "!stores":
             if args.help:
-                messages = subparser_prices.format_help().split('\n')
+                messages = command_prices.format_help().split('\n')
         
         for message in messages:
             # The 'reply' function automatically sends a replying PM if
             # the bot was PM'd, or addresses the user in a channel who
             # addressed the bot in a channel.
             client.reply(recipient, actor, message)
-            reset_parser_output()
 
         # Stop any other modules from handling this message.
         return True
