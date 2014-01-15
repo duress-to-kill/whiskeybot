@@ -39,3 +39,4 @@ python setup.py install
 * [python2](http://www.python.org/)
 * [PyOLP](https://github.com/cameronbwhite/PyOLP)
 * [kitnirc](https://github.com/ayust/kitnirc)
+* [BotParse](https://github.com/cameronbwhite/BotParse)
