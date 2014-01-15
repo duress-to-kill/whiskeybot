@@ -17,6 +17,23 @@ A simple IRC bot to interface with OLCC's liquor sales API
 - Return a random drinking game.
 - Return the most-requested liquor name by a specified irc user.
 
+## Install
+
+### Installing in a virtualenv
+
+```sh 
+# 1. Clone whiskeybot
+git https://github.com/mongolsamurai/whiskeybot.git
+# 2. Enter Repo
+cd whiskeybot
+# 3. Create a virtual enviroment
+virtualenv venv
+# 4. Enter vittual enviroment
+source venv/bin/activate
+# 5. Install dependencies
+python setup.py install
+```
+
 ## Dependencies ##
 
 * [python2](http://www.python.org/)
